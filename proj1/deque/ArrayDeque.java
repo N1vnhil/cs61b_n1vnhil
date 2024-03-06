@@ -4,40 +4,64 @@ import java.util.Iterator;
 
 public class ArrayDeque<T>{
 
-
-    private int size;
-    private T[] list;
-    private int length=8;
+    int size;
+    int capacity = 8;
+    T[] items;
+    int p = 0;    //p point to the first item
 
     public ArrayDeque(){
-        list = (T[]) new Object[length];
-        size = 0;
+        items = (T[]) new Object[capacity];
+    }
+
+    private void resize(int i){
+        T[] temp = (T[]) new Object[i];
+        if(p+size<=capacity){
+            System.arraycopy(items, p, temp, 0, size);
+        }
+        else{
+            System.arraycopy(items, p, temp, 0, capacity-p);
+            System.arraycopy(items, 0, temp, capacity-p, p+size-capacity);
+        }
+        items = temp;
+        p = 0;
     }
 
     public void addFirst(T item){
-        if(size==length){
-            length *= 2;
+        if(size==capacity){
+            resize(capacity*2);
+            capacity *= 2;
         }
-        T[] a = (T[]) new Object[length];
-        a[0] = item;
-        System.arraycopy(list, 0, a, 1, size);
-        list = a;
+
+
+        //set first item by pointer p, then renew p value
+        if(p-1<0){
+            items[p-1+capacity] = item;
+            p = p - 1 + capacity;
+        }else{
+            items[p-1] = item;
+            p -= 1;
+        }
+
         size += 1;
+
     }
 
     public void addLast(T item){
-        if(size==length){
-            length *= 2;
-            T[] a = (T[]) new Object[length];
-            System.arraycopy(list, 0, a, 0, size);
-            list = a;
+        if(size==capacity){
+            resize(capacity*2);
+            capacity *= 2;
         }
-        list[size] = item;
+
+        if(p+size<capacity){
+            items[p+size] = item;
+        }else{
+            items[p+size-capacity] = item;
+        }
         size += 1;
     }
 
     public boolean isEmpty(){
-        return size == 0;
+        return size==0;
     }
 
     public int size(){
@@ -47,37 +71,57 @@ public class ArrayDeque<T>{
     public void printDeque(){
         System.out.print("[");
         for(int i=0; i<size; i++){
-            System.out.print(list[i]);
-            if(i==size-1) continue;
-            System.out.print(" ");
+            System.out.print(items[i]);
+            if(i!=size-1){
+                System.out.print(", ");
+            }
         }
         System.out.print("]");
-        System.out.println();
     }
 
     public T removeFirst(){
-        T item = list[0];
-        T[] a = (T[]) new Object[length];
-        System.arraycopy(list, 1, a, 0, size-1);
-        list = a;
+        T val = items[p];
+        items[p] = null;
+        if(p+1<capacity){
+            p += 1;
+        }else{
+            p = p + 1 - capacity;
+        }
         size -= 1;
-        return item;
+        if(size < capacity/4 && size > 4){
+            resize(capacity/4);
+        }
+        return val;
     }
 
     public T removeLast(){
-        T item = list[size-1];
-        T[] a = (T[]) new Object[length];
-        System.arraycopy(list, 0, a, 0, size-1);
-        list = a;
+        T val;
+        if(p+size-1<capacity) {
+            val = items[p + size - 1];
+            items[p + size - 1] = null;
+        }else{
+            val = items[p + size - 1 - capacity];
+            items[p + size - 1 - capacity] = null;
+        }
         size -= 1;
-        return item;
+        if(size < capacity/4 && size > 4){
+            resize(capacity/4);
+        }
+        return val;
     }
 
-    public T get(int index){
-        return list[index-1];
+    public T get(int i){
+        if(p+i<capacity) return items[p+i];
+        else return items[p+i-capacity];
     }
 
-    //public Iterator<T> iterator(){}
-    //public boolean equals(Object o){}
+    public static void main(String[] args){
+        ArrayDeque<Integer> ls= new ArrayDeque<>();
+        for(int i=0; i<20; i++){
+            ls.addLast(i);
+            ls.addFirst(i);
+        }
+        ls.printDeque();
+    }
 
 }

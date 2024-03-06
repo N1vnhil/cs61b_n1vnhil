@@ -123,6 +123,15 @@ public class LinkedListDeque<T> {
         return p.item;
     }
 
+    public T getRecursive(int index){
+        Node p = sentinel;
+        if(index!=0){
+            p = p.next;
+            return getRecursive(index--);
+        }
+        return p.item;
+    }
+
     //public Iterator<T> iterator(){}
     //public boolean equals(Object o){}
 
